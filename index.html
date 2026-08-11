@@ -1,1 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>QR Manager</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    .qr {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      background: #111827;
+      color: white;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #message {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="card">
+
+    <h1>🔐 QR Manager</h1>
+
+    <div id="login">
+
+      <p>Connectez-vous pour gérer vos QR codes.</p>
+
+      <input
+        type="email"
+        id="email"
+        placeholder="Adresse e-mail"
+      >
+
+      <input
+        type="password"
+        id="password"
+        placeholder="Mot de passe"
+      >
+
+      <button onclick="login()">
+        Se connecter
+      </button>
+
+      <div id="loginMessage"></div>
+
+    </div>
+
+    <div id="dashboard" class="hidden">
+
+      <h2>Mes QR codes</h2>
+
+      <div id="qrList"></div>
+
+      <button onclick="logout()">
+        Se déconnecter
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+  "https://zkalwusfxdllauymmhtl.supabase.co";
+
+const SUPABASE_ANON_KEY =
+  "REMPLACE_PAR_TA_PUBLISHABLE_KEY";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
+
+async function login() {
+
+  const email =
+    document.getElementById("email").value;
+
+  const password =
+    document.getElementById("password").value;
+
+  const message =
+    document.getElementById("loginMessage");
+
+  message.textContent = "Connexion...";
+
+  const { error } =
+    await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+  if (error) {
+
+    message.textContent =
+      "Erreur : " + error.message;
+
+    return;
+  }
+
+  message.textContent = "";
+
+  afficherDashboard();
+}
+
+async function afficherDashboard() {
+
+  document
+    .getElementById("login")
+    .classList.add("hidden");
+
+  document
+    .getElementById("dashboard")
+    .classList.remove("hidden");
+
+  chargerQR();
+}
+
+async function chargerQR() {
+
+  const { data, error } =
+    await supabaseClient
+      .from("qr_codes")
+      .select("*")
+      .order("created_at", {
+        ascending: false
+      });
+
+  const liste =
+    document.getElementById("qrList");
+
+  if (error) {
+
+    liste.innerHTML =
+      "<p>Erreur : " +
+      error.message +
+      "</p>";
+
+    return;
+  }
+
+  liste.innerHTML = "";
+
+  data.forEach(qr => {
+
+    const element =
+      document.createElement("div");
+
+    element.className = "qr";
+
+    element.innerHTML = `
+
+      <h3>${qr.name}</h3>
+
+      <p>
+        Destination actuelle :
+      </p>
+
+      <input
+        id="url-${qr.id}"
+        value="${qr.target_url}"
+      >
+
+      <button
+        onclick="modifierQR('${qr.id}')"
+      >
+        💾 Enregistrer
+      </button>
+
+      <p>
+        Statut :
+        ${qr.active ? "🟢 Actif" : "🔴 Désactivé"}
+      </p>
+
+    `;
+
+    liste.appendChild(element);
+
+  });
+
+}
+
+async function modifierQR(id) {
+
+  const nouvelleURL =
+    document.getElementById(
+      "url-" + id
+    ).value;
+
+  const { error } =
+    await supabaseClient
+      .from("qr_codes")
+      .update({
+        target_url: nouvelleURL
+      })
+      .eq("id", id);
+
+  if (error) {
+
+    alert(
+      "Erreur : " +
+      error.message
+    );
+
+    return;
+  }
+
+  alert(
+    "✅ Destination modifiée !"
+  );
+
+}
+
+async function logout() {
+
+  await supabaseClient.auth.signOut();
+
+  location.reload();
+
+}
+
+</script>
+
+</body>
+</html>
