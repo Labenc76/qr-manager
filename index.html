@@ -8,121 +8,271 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
   <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: #f4f6f8;
-      color: #222;
+      color: #1f2937;
     }
 
     .container {
-      max-width: 900px;
-      margin: 60px auto;
+      max-width: 1100px;
+      margin: 40px auto;
       padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .header h1 {
+      margin: 0;
     }
 
     .card {
       background: white;
-      border-radius: 12px;
-      padding: 30px;
+      border-radius: 14px;
+      padding: 25px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
     }
 
-    h1 {
-      margin-top: 0;
-    }
-
-    .qr {
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 20px;
-      margin-top: 20px;
+    .login-card {
+      max-width: 450px;
+      margin: 100px auto;
     }
 
     input {
       width: 100%;
-      box-sizing: border-box;
       padding: 12px;
-      margin-top: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
-    }
-
-    button {
-      margin-top: 15px;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 6px;
-      background: #111827;
-      color: white;
-      cursor: pointer;
+      margin-top: 7px;
+      margin-bottom: 15px;
+      border: 1px solid #d1d5db;
+      border-radius: 7px;
       font-size: 15px;
     }
 
-    button:hover {
-      opacity: 0.9;
+    button {
+      border: none;
+      border-radius: 7px;
+      padding: 11px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+
+    .btn-primary {
+      background: #111827;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-danger {
+      background: #dc2626;
+      color: white;
+    }
+
+    .btn-success {
+      background: #16a34a;
+      color: white;
+    }
+
+    .qr-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .qr-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .qr-header h3 {
+      margin: 0;
+    }
+
+    .status {
+      font-weight: bold;
+    }
+
+    .active {
+      color: #16a34a;
+    }
+
+    .inactive {
+      color: #dc2626;
+    }
+
+    .stats {
+      display: flex;
+      gap: 30px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      background: #f3f4f6;
+      padding: 12px 18px;
+      border-radius: 8px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 20px;
+    }
+
+    .actions {
+      margin-top: 15px;
+    }
+
+    .qr-preview {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .qr-preview img {
+      border: 1px solid #ddd;
+      padding: 10px;
+      background: white;
+    }
+
+    .message {
+      margin-top: 10px;
+      font-weight: bold;
     }
 
     .hidden {
-      display: none;
+      display: none !important;
     }
 
-    #message {
-      margin-top: 15px;
-      font-weight: bold;
+    .small {
+      font-size: 13px;
+      color: #6b7280;
+      word-break: break-all;
     }
+
+    @media(max-width:700px) {
+
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+
+      .stats {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+    }
+
   </style>
 </head>
 
 <body>
 
-<div class="container">
+<div id="login" class="container">
 
-  <div class="card">
+  <div class="card login-card">
 
     <h1>🔐 QR Manager</h1>
 
-    <div id="login">
+    <p>
+      Connectez-vous pour gérer vos QR codes.
+    </p>
 
-      <p>Connectez-vous pour gérer vos QR codes.</p>
+    <label>Adresse e-mail</label>
 
-      <input
-        type="email"
-        id="email"
-        placeholder="Adresse e-mail"
-      >
+    <input
+      type="email"
+      id="email"
+      placeholder="Votre adresse e-mail"
+    >
 
-      <input
-        type="password"
-        id="password"
-        placeholder="Mot de passe"
-      >
+    <label>Mot de passe</label>
 
-      <button onclick="login()">
-        Se connecter
-      </button>
+    <input
+      type="password"
+      id="password"
+      placeholder="Votre mot de passe"
+    >
 
-      <div id="loginMessage"></div>
+    <button
+      class="btn-primary"
+      onclick="login()"
+    >
+      Se connecter
+    </button>
+
+    <div
+      id="loginMessage"
+      class="message"
+    ></div>
+
+  </div>
+
+</div>
+
+
+<div id="dashboard" class="container hidden">
+
+  <div class="header">
+
+    <div>
+
+      <h1>📱 QR Manager</h1>
+
+      <p>
+        Gestion de vos QR codes dynamiques
+      </p>
 
     </div>
 
-    <div id="dashboard" class="hidden">
+    <button
+      class="btn-secondary"
+      onclick="logout()"
+    >
+      Déconnexion
+    </button>
 
-      <h2>Mes QR codes</h2>
+  </div>
 
-      <div id="qrList"></div>
 
-      <button onclick="logout()">
-        Se déconnecter
-      </button>
+  <div class="card">
+
+    <h2>Mes QR codes</h2>
+
+    <div id="qrList">
+
+      Chargement...
 
     </div>
 
   </div>
 
 </div>
+
 
 <script>
 
@@ -132,11 +282,18 @@ const SUPABASE_URL =
 const SUPABASE_ANON_KEY =
   "sb_publishable_gCLDxRp-SgIlwXmFZ1AmoQ_RIKUqYMD";
 
+
 const supabaseClient =
   window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY
   );
+
+
+const FUNCTION_URL =
+  SUPABASE_URL +
+  "/functions/v1/qr";
+
 
 async function login() {
 
@@ -149,7 +306,8 @@ async function login() {
   const message =
     document.getElementById("loginMessage");
 
-  message.textContent = "Connexion...";
+  message.textContent =
+    "Connexion...";
 
   const { error } =
     await supabaseClient.auth.signInWithPassword({
@@ -160,7 +318,7 @@ async function login() {
   if (error) {
 
     message.textContent =
-      "Erreur : " + error.message;
+      "❌ " + error.message;
 
     return;
   }
@@ -168,7 +326,9 @@ async function login() {
   message.textContent = "";
 
   afficherDashboard();
+
 }
+
 
 async function afficherDashboard() {
 
@@ -181,9 +341,18 @@ async function afficherDashboard() {
     .classList.remove("hidden");
 
   chargerQR();
+
 }
 
+
 async function chargerQR() {
+
+  const liste =
+    document.getElementById("qrList");
+
+  liste.innerHTML =
+    "Chargement...";
+
 
   const { data, error } =
     await supabaseClient
@@ -193,90 +362,442 @@ async function chargerQR() {
         ascending: false
       });
 
-  const liste =
-    document.getElementById("qrList");
 
   if (error) {
 
     liste.innerHTML =
-      "<p>Erreur : " +
+      "<p>❌ Erreur : " +
       error.message +
       "</p>";
 
     return;
   }
 
+
+  if (!data || data.length === 0) {
+
+    liste.innerHTML =
+      "<p>Aucun QR code.</p>";
+
+    return;
+  }
+
+
   liste.innerHTML = "";
 
-  data.forEach(qr => {
 
-    const element =
-      document.createElement("div");
+  for (const qr of data) {
 
-    element.className = "qr";
+    await afficherQRCode(qr);
 
-    element.innerHTML = `
+  }
 
-      <h3>${qr.name}</h3>
+}
 
-      <p>
-        Destination actuelle :
-      </p>
 
-      <input
-        id="url-${qr.id}"
-        value="${qr.target_url}"
-      >
+async function afficherQRCode(qr) {
+
+  const liste =
+    document.getElementById("qrList");
+
+
+  const permanentUrl =
+    FUNCTION_URL +
+    "?id=" +
+    qr.id;
+
+
+  const { count, error: countError } =
+    await supabaseClient
+      .from("qr_scans")
+      .select("*", {
+        count: "exact",
+        head: true
+      })
+      .eq("qr_id", qr.id);
+
+
+  const { data: lastScan } =
+    await supabaseClient
+      .from("qr_scans")
+      .select("scanned_at")
+      .eq("qr_id", qr.id)
+      .order("scanned_at", {
+        ascending: false
+      })
+      .limit(1)
+      .maybeSingle();
+
+
+  let dernierScan =
+    "Jamais";
+
+
+  if (lastScan) {
+
+    dernierScan =
+      new Date(
+        lastScan.scanned_at
+      ).toLocaleString(
+        "fr-FR",
+        {
+          timeZone:
+            "Europe/Paris",
+          dateStyle:
+            "short",
+          timeStyle:
+            "short"
+        }
+      );
+
+  }
+
+
+  const card =
+    document.createElement("div");
+
+  card.className =
+    "qr-card";
+
+
+  const status =
+    qr.active
+      ? '<span class="status active">🟢 Actif</span>'
+      : '<span class="status inactive">🔴 Désactivé</span>';
+
+
+  card.innerHTML = `
+
+    <div class="qr-header">
+
+      <h3>
+        ${escapeHtml(qr.name)}
+      </h3>
+
+      ${status}
+
+    </div>
+
+
+    <p>
+      <strong>Destination actuelle :</strong>
+    </p>
+
+
+    <input
+      id="url-${qr.id}"
+      value="${escapeHtml(qr.target_url)}"
+    >
+
+
+    <div class="stats">
+
+      <div class="stat">
+
+        <strong>
+          ${count || 0}
+        </strong>
+
+        scans
+
+      </div>
+
+
+      <div class="stat">
+
+        <strong>
+          ${dernierScan}
+        </strong>
+
+        dernier scan
+
+      </div>
+
+    </div>
+
+
+    <p class="small">
+
+      URL permanente :<br>
+
+      ${permanentUrl}
+
+    </p>
+
+
+    <div class="actions">
 
       <button
+        class="btn-primary"
         onclick="modifierQR('${qr.id}')"
       >
         💾 Enregistrer
       </button>
 
-      <p>
-        Statut :
-        ${qr.active ? "🟢 Actif" : "🔴 Désactivé"}
-      </p>
 
-    `;
+      <button
+        class="btn-secondary"
+        onclick="copierLien('${permanentUrl}')"
+      >
+        🔗 Copier le lien
+      </button>
 
-    liste.appendChild(element);
 
-  });
+      <button
+        class="btn-secondary"
+        onclick="afficherQR('${qr.id}', '${escapeHtml(qr.name)}', '${permanentUrl}')"
+      >
+        📱 Afficher le QR
+      </button>
+
+
+      <button
+        class="btn-secondary"
+        onclick="toggleActive('${qr.id}', ${qr.active})"
+      >
+
+        ${qr.active
+          ? "🔴 Désactiver"
+          : "🟢 Activer"}
+
+      </button>
+
+    </div>
+
+
+    <div
+      id="preview-${qr.id}"
+      class="qr-preview"
+    >
+
+      <div
+        id="qr-${qr.id}"
+      ></div>
+
+      <br>
+
+      <button
+        class="btn-primary"
+        onclick="telechargerQR('${qr.id}', '${escapeHtml(qr.name)}')"
+      >
+        ⬇️ Télécharger le QR
+      </button>
+
+    </div>
+
+  `;
+
+
+  liste.appendChild(card);
 
 }
 
+
 async function modifierQR(id) {
 
-  const nouvelleURL =
+  const input =
     document.getElementById(
       "url-" + id
-    ).value;
+    );
+
+
+  const nouvelleURL =
+    input.value.trim();
+
+
+  if (!nouvelleURL) {
+
+    alert(
+      "Veuillez renseigner une URL."
+    );
+
+    return;
+  }
+
+
+  try {
+
+    new URL(nouvelleURL);
+
+  } catch {
+
+    alert(
+      "L'URL n'est pas valide."
+    );
+
+    return;
+  }
+
 
   const { error } =
     await supabaseClient
       .from("qr_codes")
       .update({
-        target_url: nouvelleURL
+        target_url:
+          nouvelleURL
       })
       .eq("id", id);
+
 
   if (error) {
 
     alert(
-      "Erreur : " +
+      "❌ Erreur : " +
       error.message
     );
 
     return;
   }
 
+
   alert(
     "✅ Destination modifiée !"
   );
 
+
+  chargerQR();
+
 }
+
+
+async function toggleActive(
+  id,
+  currentStatus
+) {
+
+  const { error } =
+    await supabaseClient
+      .from("qr_codes")
+      .update({
+        active:
+          !currentStatus
+      })
+      .eq("id", id);
+
+
+  if (error) {
+
+    alert(
+      "❌ Erreur : " +
+      error.message
+    );
+
+    return;
+  }
+
+
+  chargerQR();
+
+}
+
+
+function afficherQR(
+  id,
+  name,
+  url
+) {
+
+  const preview =
+    document.getElementById(
+      "preview-" + id
+    );
+
+
+  const container =
+    document.getElementById(
+      "qr-" + id
+    );
+
+
+  container.innerHTML = "";
+
+
+  new QRCode(
+    container,
+    {
+      text: url,
+      width: 250,
+      height: 250
+    }
+  );
+
+
+  preview.style.display =
+    "block";
+
+}
+
+
+function telechargerQR(
+  id,
+  name
+) {
+
+  const container =
+    document.getElementById(
+      "qr-" + id
+    );
+
+
+  const image =
+    container.querySelector(
+      "img"
+    );
+
+
+  if (!image) {
+
+    alert(
+      "Affichez d'abord le QR code."
+    );
+
+    return;
+  }
+
+
+  const link =
+    document.createElement("a");
+
+
+  link.href =
+    image.src;
+
+
+  link.download =
+    name.replace(
+      /[^a-z0-9]/gi,
+      "_"
+    ) +
+    ".png";
+
+
+  link.click();
+
+}
+
+
+async function copierLien(url) {
+
+  try {
+
+    await navigator.clipboard.writeText(
+      url
+    );
+
+    alert(
+      "✅ Lien copié !"
+    );
+
+  } catch {
+
+    alert(
+      "Impossible de copier automatiquement le lien."
+    );
+
+  }
+
+}
+
 
 async function logout() {
 
@@ -285,6 +806,39 @@ async function logout() {
   location.reload();
 
 }
+
+
+function escapeHtml(value) {
+
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+}
+
+
+async function verifierSession() {
+
+  const { data } =
+    await supabaseClient.auth.getSession();
+
+
+  if (
+    data &&
+    data.session
+  ) {
+
+    afficherDashboard();
+
+  }
+
+}
+
+
+verifierSession();
 
 </script>
 
