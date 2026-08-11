@@ -262,6 +262,57 @@
   <div class="card">
 
     <h2>Mes QR codes</h2>
+    <button
+  class="btn-primary"
+  onclick="afficherFormulaireNouveauQR()"
+>
+  ➕ Nouveau QR code
+</button>
+
+<div
+  id="nouveauQRForm"
+  class="hidden"
+  style="margin-top:20px;"
+>
+
+  <h3>Créer un nouveau QR code</h3>
+
+  <label>Nom du QR code</label>
+
+  <input
+    type="text"
+    id="nouveauQRNom"
+    placeholder="Ex : Affiche Rouen Hockey"
+  >
+
+  <label>URL de destination</label>
+
+  <input
+    type="url"
+    id="nouveauQRUrl"
+    placeholder="https://exemple.fr"
+  >
+
+  <button
+    class="btn-success"
+    onclick="creerNouveauQR()"
+  >
+    ✅ Créer le QR code
+  </button>
+
+  <button
+    class="btn-secondary"
+    onclick="fermerFormulaireNouveauQR()"
+  >
+    Annuler
+  </button>
+
+  <div
+    id="nouveauQRMessage"
+    class="message"
+  ></div>
+
+</div>
 
     <div id="qrList">
 
@@ -592,7 +643,120 @@ async function afficherQRCode(qr) {
 
 }
 
+function afficherFormulaireNouveauQR() {
 
+  document
+    .getElementById("nouveauQRForm")
+    .classList.remove("hidden");
+
+}
+
+
+function fermerFormulaireNouveauQR() {
+
+  document
+    .getElementById("nouveauQRForm")
+    .classList.add("hidden");
+
+}
+
+
+async function creerNouveauQR() {
+
+  const nom =
+    document
+      .getElementById("nouveauQRNom")
+      .value
+      .trim();
+
+  const targetUrl =
+    document
+      .getElementById("nouveauQRUrl")
+      .value
+      .trim();
+
+  const message =
+    document
+      .getElementById("nouveauQRMessage");
+
+
+  if (!nom) {
+
+    message.textContent =
+      "❌ Veuillez renseigner un nom.";
+
+    return;
+  }
+
+
+  if (!targetUrl) {
+
+    message.textContent =
+      "❌ Veuillez renseigner une URL.";
+
+    return;
+  }
+
+
+  try {
+
+    new URL(targetUrl);
+
+  } catch {
+
+    message.textContent =
+      "❌ L'URL n'est pas valide.";
+
+    return;
+  }
+
+
+  message.textContent =
+    "Création en cours...";
+
+
+  const { error } =
+    await supabaseClient
+      .from("qr_codes")
+      .insert({
+        name: nom,
+        target_url: targetUrl,
+        active: true
+      });
+
+
+  if (error) {
+
+    message.textContent =
+      "❌ Erreur : " +
+      error.message;
+
+    return;
+  }
+
+
+  message.textContent =
+    "✅ QR code créé !";
+
+
+  document
+    .getElementById("nouveauQRNom")
+    .value = "";
+
+  document
+    .getElementById("nouveauQRUrl")
+    .value = "";
+
+
+  setTimeout(() => {
+
+    fermerFormulaireNouveauQR();
+
+    chargerQR();
+
+  }, 800);
+
+}
 async function modifierQR(id) {
 
   const input =
