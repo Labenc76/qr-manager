@@ -521,9 +521,15 @@ async function afficherQRCode(qr) {
 
     <div class="qr-header">
 
-      <h3>
-        ${escapeHtml(qr.name)}
-      </h3>
+     <input
+  id="name-${qr.id}"
+  value="${escapeHtml(qr.name)}"
+  style="
+    font-size:18px;
+    font-weight:bold;
+    margin:0;
+  "
+>
 
       ${status}
 
@@ -584,6 +590,12 @@ async function afficherQRCode(qr) {
       >
         💾 Enregistrer
       </button>
+      <button
+  class="btn-secondary"
+  onclick="modifierNomQR('${qr.id}')"
+>
+  ✏️ Modifier le nom
+</button>
 
 
       <button
@@ -612,6 +624,25 @@ async function afficherQRCode(qr) {
           : "🟢 Activer"}
 
       </button>
+      <button
+  class="btn-secondary"
+  onclick="remettreScansAZero(
+    '${qr.id}',
+    '${escapeHtml(qr.name)}'
+  )"
+>
+  🔄 Remettre les scans à 0
+</button>
+
+<button
+  class="btn-danger"
+  onclick="supprimerQR(
+    '${qr.id}',
+    '${escapeHtml(qr.name)}'
+  )"
+>
+  🗑️ Supprimer
+</button>
 
     </div>
 
@@ -757,6 +788,190 @@ async function creerNouveauQR() {
   }, 800);
 
 }
+  async function modifierNomQR(id) {
+
+  const input =
+    document.getElementById("name-" + id);
+
+  const nouveauNom =
+    input.value.trim();
+
+  if (!nouveauNom) {
+    alert("Veuillez renseigner un nom.");
+    return;
+  }
+
+  const { error } =
+    await supabaseClient
+      .from("qr_codes")
+      .update({
+        name: nouveauNom
+      })
+      .eq("id", id);
+
+  if (error) {
+    alert("❌ Erreur : " + error.message);
+    return;
+  }
+
+  alert("✅ Nom modifié !");
+  chargerQR();
+}
+
+
+async function remettreScansAZero(id, name) {
+
+  const confirmation =
+    confirm(
+      "⚠️ Remettre les scans à zéro pour \"" +
+      name +
+      "\" ?\n\n" +
+      "Tous les scans enregistrés pour ce QR seront supprimés."
+    );
+
+  if (!confirmation) {
+    return;
+  }
+
+  const { error } =
+    await supabaseClient
+      .from("qr_scans")
+      .delete()
+      .eq("qr_id", id);
+
+  if (error) {
+    alert("❌ Erreur : " + error.message);
+    return;
+  }
+
+  alert("✅ Compteur remis à zéro !");
+  chargerQR();
+}
+
+
+async function supprimerQR(id, name) {
+
+  const confirmation =
+    confirm(
+      "⚠️ SUPPRESSION DÉFINITIVE\n\n" +
+      "Voulez-vous vraiment supprimer \"" +
+      name +
+      "\" ?\n\n" +
+      "Le QR code et son historique de scans seront supprimés."
+    );
+
+  if (!confirmation) {
+    return;
+  }
+
+  const { error } =
+    await supabaseClient
+      .from("qr_codes")
+      .delete()
+      .eq("id", id);
+
+  if (error) {
+    alert("❌ Erreur : " + error.message);
+    return;
+  }
+
+  alert("✅ QR code supprimé !");
+  chargerQR();
+}
+  async function modifierNomQR(id) {
+
+  const input =
+    document.getElementById("name-" + id);
+
+  const nouveauNom =
+    input.value.trim();
+
+  if (!nouveauNom) {
+    alert("Veuillez renseigner un nom.");
+    return;
+  }
+
+  const { error } =
+    await supabaseClient
+      .from("qr_codes")
+      .update({
+        name: nouveauNom
+      })
+      .eq("id", id);
+
+  if (error) {
+    alert("❌ Erreur : " + error.message);
+    return;
+  }
+
+  alert("✅ Nom modifié !");
+
+  chargerQR();
+}
+
+
+async function remettreScansAZero(id, name) {
+
+  const confirmation =
+    confirm(
+      "⚠️ Remettre les scans à zéro pour \"" +
+      name +
+      "\" ?\n\n" +
+      "Tous les scans enregistrés pour ce QR seront supprimés."
+    );
+
+  if (!confirmation) {
+    return;
+  }
+
+  const { error } =
+    await supabaseClient
+      .from("qr_scans")
+      .delete()
+      .eq("qr_id", id);
+
+  if (error) {
+    alert("❌ Erreur : " + error.message);
+    return;
+  }
+
+  alert("✅ Compteur remis à zéro !");
+
+  chargerQR();
+}
+
+
+async function supprimerQR(id, name) {
+
+  const confirmation =
+    confirm(
+      "⚠️ SUPPRESSION DÉFINITIVE\n\n" +
+      "Voulez-vous vraiment supprimer \"" +
+      name +
+      "\" ?\n\n" +
+      "Le QR code et son historique de scans seront supprimés."
+    );
+
+  if (!confirmation) {
+    return;
+  }
+
+  const { error } =
+    await supabaseClient
+      .from("qr_codes")
+      .delete()
+      .eq("id", id);
+
+  if (error) {
+    alert("❌ Erreur : " + error.message);
+    return;
+  }
+
+  alert("✅ QR code supprimé !");
+
+  chargerQR();
+}
+
 async function modifierQR(id) {
 
   const input =
